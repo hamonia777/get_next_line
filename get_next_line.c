@@ -6,15 +6,20 @@
 /*   By: jinwpark <jinwpark@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 19:24:52 by jinwpark          #+#    #+#             */
-/*   Updated: 2025/03/21 16:07:09 by jinwpark         ###   ########.fr       */
+/*   Updated: 2025/03/21 16:15:47 by jinwpark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*jw_merge()
+char	*jw_merge(char *str1, char *str2)
 {
+	char *merge_str;
 
+	merge_str = ft_strjoin(str1,str2);
+	free(str1);
+	free(str2);
+	return (merge_str);
 }
 
 char	*jw_read(char *backup, int fd)
@@ -28,7 +33,7 @@ char	*jw_read(char *backup, int fd)
 	while (read_count > 0)
 	{
 		read_count = read(fd, buf, BUFFER_SIZE);
-		merge_str = ft_strjoin(backup, buf);
+		merge_str = jw_merge(backup, buf);
 		if (ft_strchr(buf, '\n') != 0)
 			break;
 		backup = merge_str;
