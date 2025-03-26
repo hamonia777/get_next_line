@@ -6,7 +6,7 @@
 /*   By: jinwpark <jinwpark@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/21 15:01:34 by jinwpark          #+#    #+#             */
-/*   Updated: 2025/03/21 15:01:36 by jinwpark         ###   ########.fr       */
+/*   Updated: 2025/03/25 22:45:52 by jinwpark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ size_t	ft_strlen(const char *str)
 	size_t	num;
 
 	num = 0;
+	if (!str)
+		return (0);
 	while (str[num])
 	{
 		num++;
