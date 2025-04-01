@@ -6,7 +6,7 @@
 /*   By: jinwpark <jinwpark@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/21 15:01:34 by jinwpark          #+#    #+#             */
-/*   Updated: 2025/03/25 22:45:52 by jinwpark         ###   ########.fr       */
+/*   Updated: 2025/04/01 21:38:51 by jinwpark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,8 @@ char	*ft_strchr(const char *str, int c)
 
 	i = 0;
 	tmp = (unsigned char)c;
+	if (!str)
+	return (NULL);
 	while ((unsigned char)str[i] != tmp)
 	{
 		if ((unsigned char)str[i] == '\0')

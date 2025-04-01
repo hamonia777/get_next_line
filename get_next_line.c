@@ -6,114 +6,95 @@
 /*   By: jinwpark <jinwpark@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/17 19:24:52 by jinwpark          #+#    #+#             */
-/*   Updated: 2025/03/26 20:15:13 by jinwpark         ###   ########.fr       */
+/*   Updated: 2025/04/01 21:38:08 by jinwpark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*jw_read(int fd)
-{
-	int		read_count;
-	char	*merge_str;
-	char	*buf;
-	char	*tmp;
-
-	buf = malloc(BUFFER_SIZE + 1);
-	if (!buf)
-		return (NULL);
-	merge_str = NULL;
-	read_count = 1;
-	while (read_count > 0)
-	{
-		read_count = read(fd, buf, BUFFER_SIZE);
-		if(read_count <= 0)
-			break;
-		buf[read_count] = '\0';
-		tmp = merge_str;
-		if (!merge_str)
-			merge_str = ft_strdup(buf);
-		else
-			merge_str = ft_strjoin(merge_str, buf);
-		free(tmp);
-		if (ft_strchr(buf, '\n') != 0)
-			break ;
-	}
-	free(buf);
-	return (merge_str);
-}
-
-char	*jw_cutting(char *backup)
-{
-	int		i;
-	int		j;
-	char	*str;
-
-	i = 0;
-	j = 0;
-	while (backup[i] && backup[i] != '\n')
-		i++;
-	if (backup[i] == '\n')
-		i++;
-	str = malloc(i + 1);
-	if (!str)
-		return (NULL);
-	while (j < i)
-	{
-		str[j] = backup[j];
-		j++;
-	}
-	str[j] = '\0';
-	return (str);
-}
-
-char	*jw_update(char *str)
-{
-	int		i;
-	int		j;
-	char	*tmp;
-
-	j = 0;
-	i = 0;
-	while (str[i] && str[i] != '\n')
-		i++;
-	if (str[i] == '\n')
-		i++;
-	tmp = malloc(i + 1);
-	if(!tmp)
-		return (NULL);
-	while (str[i])
-	{
-		tmp[j] = str[i];
-		i++;
-		j++;
-	}
-	tmp[j] = '\0';
-	free(str);
-	return (tmp);
-}
-
 char	*get_next_line(int fd)
 {
-	static char	*backup;
-	char		*str;
+	static char	*backup = NULL;
+	char		*buf;
+	ssize_t		bytes_read;
 	char		*tmp;
-	if (fd < 0)
+	char		*newline_pos;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	if(!backup)
-		backup = jw_read(fd);
+	// 1) 버퍼 할당
+	buf = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buf)
+		return (NULL);
+
+	bytes_read = 1;
+	// 2) 읽기 루프: backup에 '\n'이 없고, read 반환값이 0이 아닐 동안 반복
+	while (!ft_strchr(backup, '\n') && bytes_read != 0)
+	{
+		bytes_read = read(fd, buf, BUFFER_SIZE);
+		if (bytes_read == -1)
+		{
+			// 읽기 에러 -> 누수 방지를 위해 buf와 backup 해제 후 NULL 반환
+			free(buf);
+			if (backup)
+			{
+				free(backup);
+				backup = NULL;
+			}
+			return (NULL);
+		}
+		buf[bytes_read] = '\0';
+		if (!backup)
+			backup = ft_strdup(buf);
+		else
+		{
+			// 기존 backup + 새로 읽은 buf 병합
+			tmp = ft_strjoin(backup, buf);
+			free(backup);
+			backup = tmp;
+		}
+	}
+	free(buf);
+	// 3) backup이 NULL이거나 아무 내용 없으면(EOF 상황), NULL 반환
+	if (!backup || backup[0] == '\0')
+	{
+		free(backup);
+		backup = NULL;
+		return (NULL);
+	}
+	// 4) backup 안에 newline이 있는지 확인
+	newline_pos = ft_strchr(backup, '\n');
+	if (newline_pos)
+	{
+		// 개행 문자 포함 줄 반환
+		size_t	len = newline_pos - backup + 1; // '\n'까지 길이
+		char	*line = (char *)malloc(sizeof(char) * (len + 1));
+		size_t	i = 0;
+		if (!line)
+			return (NULL);
+		while (i < len)
+		{
+			line[i] = backup[i];
+			i++;
+		}
+		line[i] = '\0';
+		// 나머지 문자열을 tmp에 복사해 backup 대체
+		tmp = ft_strdup(newline_pos + 1);
+		free(backup);
+		backup = tmp;
+		// 만약 남은 문자열이 비어있다면 free 후 NULL
+		if (backup && backup[0] == '\0')
+		{
+			free(backup);
+			backup = NULL;
+		}
+		return (line);
+	}
 	else
 	{
-		tmp = ft_strjoin(backup, jw_read(fd));
-		backup = tmp;
+		// 개행 문자가 없음 -> 남은 내용이 마지막 줄
+		char *line = backup;
+		backup = NULL; // backup 해제
+		return (line); // line은 호출자가 free해야 함
 	}
-	if(!backup)
-		return (NULL);
-	str = jw_cutting(backup);
-	if(!str)
-		return (NULL);
-	backup = jw_update(backup);
-	if(!backup)
-		return (NULL);
-	return (str);
 }

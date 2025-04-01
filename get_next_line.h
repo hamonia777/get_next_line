@@ -6,7 +6,7 @@
 /*   By: jinwpark <jinwpark@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 16:44:48 by jinwpark          #+#    #+#             */
-/*   Updated: 2025/03/25 22:45:53 by jinwpark         ###   ########.fr       */
+/*   Updated: 2025/04/01 21:18:41 by jinwpark         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <unistd.h>
 # include <stdlib.h>
+#include <limits.h>
 
 size_t	ft_strlen(const char *str);
 char	*get_next_line(int fd);
